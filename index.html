@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKTAJA RACING</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/race_style.css">
+
+    <style>
+        .topbar-notice-wrap { flex: 1; overflow: hidden; display: flex; align-items: center; margin: 0 15px; }
+        #notice_text { font-size: 13px; cursor: pointer; width: 100%; }
+        .notice-message { font-weight: 600; }
+        .notice-image { max-height: 40px; vertical-align: middle; border-radius: 4px; }
+        .notice-link { color: inherit; text-decoration: underline; }
+        #youtube-video-wrap { padding: 6px 12px; background: rgba(0, 0, 0, 0.3); }
+        #youtube-video-wrap iframe { border-radius: 4px; display: block; }
+        #taja-footer-wrap { padding: 15px; text-align: center; border-top: 1px solid var(--border); color: var(--muted); font-size: .75rem; line-height: 1.4; }
+        #taja-footer-wrap p { margin: 0; }
+        #taja-footer-wrap a { color: var(--accent); text-decoration: none; font-weight: 700; }
+        .countdown-winner { font-size: 14px; color: var(--accent); margin-bottom: 4px; font-weight: 600; }
+        .countdown-row { display: flex; align-items: center; gap: 15px; }
+        .countdown-label { text-align: left; }
+        #ws_status_dot.connected { animation: pulse-green 2s infinite; }
+    </style>
+
+    <script src="https://unpkg.com/centrifuge@3.1.0/dist/centrifuge.js" defer></script>
+</head>
+<body>
+<div id="app">
+    <header id="topbar">
+        <div class="logo">OK<span>TAJA</span> RACING</div>
+        <div class="topbar-sep"></div>
+        <div class="live-dot" id="ws_status_dot" aria-label="서버 연결 상태"></div>
+
+        <div class="topbar-notice-wrap">
+            <marquee id="notice_text" scrollamount="5">
+                <span class="notice-message">🎵 [필독] 귀가 즐거운 타자 연습 안내 · 음악과 함께 즐겨보세요.</span>
+            </marquee>
+        </div>
+
+        <div class="room-badge" id="room-label">ROOM #1</div>
+    </header>
+
+    <section id="panel-rank">
+        <div class="panel-header">
+            <span class="icon">🏆</span>
+            <h2>실시간 순위</h2>
+        </div>
+        <div id="rank-list"></div>
+    </section>
+
+    <main id="panel-game">
+        <div id="countdown-overlay">
+            <div class="cd-num" id="cd-num">3</div>
+            <div class="cd-label">다음 라운드 시작</div>
+        </div>
+
+        <div id="race-area"></div>
+
+        <div id="typing-area">
+            <div id="target_word">문장을 불러오는 중...</div>
+            <input
+                type="text"
+                id="taja_input"
+                autocomplete="off"
+                autofocus
+                placeholder="위 문장을 그대로 따라 치세요!"
+                disabled>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-label">타수</div>
+                    <div class="stat-value accent"><span id="current_wpm">0</span><span class="stat-unit"> 타</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">정확도</div>
+                    <div class="stat-value"><span id="current_acc">100</span><span class="stat-unit"> %</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">진행</div>
+                    <div class="stat-value"><span id="current_progress">0</span><span class="stat-unit"> %</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">라운드</div>
+                    <div class="stat-value"><span id="current_round">1</span><span class="stat-unit"> R</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <aside id="panel-chat">
+        <div class="panel-header">
+            <span class="icon">💬</span>
+            <h2>채팅</h2>
+        </div>
+
+        <div id="chat-messages"></div>
+        <div id="youtube-video-wrap"></div>
+
+        <div class="emoji-row">
+            <button type="button" class="emoji-btn" data-emoji="👏">👏</button>
+            <button type="button" class="emoji-btn" data-emoji="🔥">🔥</button>
+            <button type="button" class="emoji-btn" data-emoji="😱">😱</button>
+            <button type="button" class="emoji-btn" data-emoji="💨">💨</button>
+            <button type="button" class="emoji-btn" data-emoji="🏁">🏁</button>
+        </div>
+
+        <div class="chat-input-wrap">
+            <input type="text" id="chat_input" placeholder="메시지 입력..." maxlength="80">
+            <button type="button" id="chat_send">전송</button>
+        </div>
+
+        <footer id="taja-footer-wrap"></footer>
+    </aside>
+</div>
+
+<script>
+    const USER_INFO = {
+        id: 'qqq@ai.okko.kr',
+        nick: 'qqq@ai.okko.kr'
+    };
+
+    const ROOM_ID = '1';
+    const RANK_SAVE_URL = './rank_save.php';
+    const RANK_START_URL = './rank_start.php';
+    const OKTAJA_SERVER_URL = 'https://ai.okko.kr/taja_admin';
+    const NOTICE_CHANNEL = 'typing:notice';
+    const CHANNEL_PREFIX = '';
+</script>
+
+<script src="js/race_render.js"></script>
+<script src="js/taja_core.js"></script>
+<script src="js/taja_game.js"></script>
+
+<script>
+    window.addEventListener('load', () => {
+        TajaRender.init();
+        TajaCore.init();
+        TajaGame.init();
+    });
+</script>
+</body>
+</html>

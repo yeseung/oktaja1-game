@@ -1,0 +1,140 @@
+/* /002/plugin/oktaja/css/race_style.css */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:        #080c14;
+    --panel:     #0d1422;
+    --border:    rgba(255,255,255,0.06);
+    --accent:    #22d3ee;
+    --accent-glow: rgba(34, 211, 238, 0.3);
+    --accent2:   #6366f1;
+    --success:   #10b981;
+    --danger:    #f43f5e;
+    --warn:      #f59e0b;
+    --text:      #e2e8f0;
+    --muted:     #475569;
+    --dim:       #1e293b;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Noto Sans KR', sans-serif;
+}
+
+html, body {
+    height: 100%; width: 100%;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body); overflow: hidden;
+}
+
+body::before {
+    content: ''; position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none; z-index: 999;
+}
+
+#app {
+    display: grid;
+    grid-template-columns: 240px 1fr 260px;
+    grid-template-rows: 44px 1fr;
+    height: 100vh; gap: 0;
+}
+
+#topbar {
+    grid-column: 1 / -1; background: var(--panel); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 20px; gap: 16px;
+}
+.logo { font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
+.logo span { color: var(--muted); }
+.topbar-sep { width: 1px; height: 20px; background: var(--border); }
+.room-badge { font-family: var(--font-mono); font-size: 11px; color: var(--accent); background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.2); padding: 3px 10px; border-radius: 3px; }
+.live-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); } 50% { opacity:0.8; box-shadow: 0 0 0 5px rgba(16,185,129,0); } }
+
+/* ─── LEFT: LEADERBOARD ─── */
+#panel-rank { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.panel-header h2 { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+#rank-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+#rank-list::-webkit-scrollbar { width: 3px; }
+#rank-list::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+.rank-item { display: flex; align-items: center; padding: 9px 16px; gap: 10px; transition: background 0.15s; }
+.rank-item.me { background: rgba(34,211,238,0.04); border-left: 2px solid var(--accent); }
+.rank-item.me .rank-nick { color: var(--accent); }
+.rank-num { font-family: var(--font-mono); font-size: 11px; font-weight: 600; width: 18px; text-align: center; color: var(--muted); flex-shrink: 0; }
+.rank-num.gold { color: #f59e0b; } .rank-num.silver { color: #94a3b8; } .rank-num.bronze { color: #b45309; }
+.rank-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--dim); display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1px solid var(--border); }
+.rank-info { flex: 1; min-width: 0; }
+.rank-nick { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-nick .domain-tag { font-size: 9px; color: #64748b; font-weight: normal; margin-left: 3px; }
+.rank-wpm { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+.rank-progress-wrap { width: 100%; padding: 0 16px 0 46px; padding-bottom: 6px; }
+.rank-bar-bg { height: 2px; background: var(--dim); border-radius: 2px; overflow: hidden; }
+.rank-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.4s; }
+.rank-item.me .rank-bar-fill { background: linear-gradient(90deg, var(--accent), #67e8f9); }
+
+/* ─── CENTER: GAME ─── */
+#panel-game { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); position: relative;}
+#race-area { flex: 1; padding: 20px 24px 0; overflow: hidden; display: flex; flex-direction: column; gap: 0; }
+.race-player { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.race-player.me .player-nick { color: var(--accent); }
+.player-nick { font-size: 11px; font-weight: 600; width: 90px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.player-nick .me-badge { font-size: 9px; color: var(--accent); background: rgba(34,211,238,0.1); padding: 1px 4px; border-radius: 2px; margin-left: 4px; }
+.race-track { flex: 1; height: 6px; background: var(--dim); border-radius: 3px; position: relative; }
+.race-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent2), #818cf8); transition: width 0.35s; position: relative; }
+.race-player.me .race-fill { background: linear-gradient(90deg, var(--accent), #67e8f9); }
+.race-fill::after { content: '🏎'; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+.player-pct { font-family: var(--font-mono); font-size: 10px; color: var(--muted); width: 34px; text-align: right; flex-shrink: 0; }
+
+#typing-area { padding: 16px 24px 18px; background: var(--panel); border-top: 1px solid var(--border); }
+#target_word { font-size: 22px; font-weight: 400; line-height: 1.65; color: var(--muted); min-height: 72px; padding: 14px 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; }
+.hl-done { color: var(--success); } .hl-cur { color: #fff; background: rgba(34,211,238,0.15); border-radius: 2px; }
+#taja_input { width: 100%; padding: 12px 16px; font-size: 18px; background: rgba(0,0,0,0.4); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; }
+#taja_input.error { border-color: var(--danger); animation: shake 0.25s ease; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+.stats-row { display: flex; gap: 0; margin-top: 10px; }
+.stat-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0; border-right: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+.stat-item:first-child { border-radius: 6px 0 0 6px; } .stat-item:last-child { border-radius: 0 6px 6px 0; border-right: none; }
+.stat-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.stat-value { font-family: var(--font-mono); font-size: 18px; font-weight: 600; color: var(--text); }
+.stat-value.accent { color: var(--accent); } .stat-unit { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+/* ─── RIGHT: CHAT ─── */
+#panel-chat { background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+#chat-messages { flex: 1; overflow-y: auto; padding: 10px 0; display: flex; flex-direction: column; }
+#chat-messages::-webkit-scrollbar { width: 3px; } #chat-messages::-webkit-scrollbar-thumb { background: var(--dim); }
+.chat-msg { padding: 6px 14px; animation: fadeUp 0.2s ease; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform: translateY(0); } }
+.chat-msg .msg-nick { font-size: 11px; font-weight: 700; margin-bottom: 1px; }
+.chat-msg.me .msg-nick { color: var(--accent); }
+.chat-msg .msg-text { font-size: 12px; color: var(--text); line-height: 1.5; word-break: break-all; }
+.chat-msg.system .msg-text { color: var(--muted); font-size: 11px; font-style: italic; }
+.chat-msg .msg-time { font-family: var(--font-mono); font-size: 9px; color: var(--muted); margin-top: 1px; }
+
+.emoji-row { display: flex; gap: 4px; padding: 8px 12px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+.emoji-btn { background: transparent; border: 1px solid var(--border); border-radius: 4px; padding: 4px 7px; font-size: 14px; cursor: pointer; transition: all 0.15s; }
+.emoji-btn:hover { background: var(--dim); border-color: var(--accent); transform: scale(1.15); }
+
+.chat-input-wrap { display: flex; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--border); }
+#chat_input { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 12px; padding: 8px 10px; outline: none; }
+#chat_send { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); border-radius: 4px; color: var(--accent); font-size: 11px; font-family: var(--font-mono); padding: 8px 12px; cursor: pointer; }
+#chat_send:hover { background: rgba(34,211,238,0.2); border-color: rgba(34,211,238,0.4); }
+
+#countdown-overlay { display: none; position: absolute; top:0; left:0; right:0; height: 110px; bottom: auto; background: rgba(13, 20, 34, 0.95) !important; border-bottom: 2px solid var(--accent); align-items: center; justify-content: center; flex-direction: column; gap: 5px; z-index: 50; backdrop-filter: blur(8px); box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+#countdown-overlay.show { display: flex; }
+.cd-num { font-family: var(--font-mono); font-size: 48px; font-weight: 700; color: var(--accent); line-height: 1; animation: cdPop 1s ease infinite; text-shadow: 0 0 20px var(--accent-glow); }
+@keyframes cdPop { 0%, 100% { transform: scale(1.2); opacity:1; } 80% { transform: scale(0.9); opacity:0.7; } }
+.cd-label { font-size: 13px; font-weight: 500; color: var(--text); letter-spacing: 0.05em; line-height: 1.4; }
+
+/* ✅ 새로 추가된 부분: 도메인 태그 및 깜빡임 버튼 */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* 이미지 광고 팝업창 내부 스타일 수정 */
+.ad-modal-box img {
+    max-width: 100%;       /* 팝업창보다 커지면 자동으로 축소 */
+    max-height: 300px;     /* 세로 높이를 최대 300px로 제한하여 게임 화면 방해 최소화 */
+    object-fit: contain;   /* 이미지 비율 유지 */
+    border-radius: 8px;
+    margin: 15px 0;
+    cursor: pointer;
+}
