@@ -2,146 +2,2781 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OKTAJA RACING</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/race_style.css">
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta
+            name="description"
+            content="실시간으로 함께 즐기는 온라인 타자 레이싱 게임입니다."
+    >
+
+    <title>OKTAJA RACING - 실시간 타자 게임</title>
 
     <style>
-        .topbar-notice-wrap { flex: 1; overflow: hidden; display: flex; align-items: center; margin: 0 15px; }
-        #notice_text { font-size: 13px; cursor: pointer; width: 100%; }
-        .notice-message { font-weight: 600; }
-        .notice-image { max-height: 40px; vertical-align: middle; border-radius: 4px; }
-        .notice-link { color: inherit; text-decoration: underline; }
-        #youtube-video-wrap { padding: 6px 12px; background: rgba(0, 0, 0, 0.3); }
-        #youtube-video-wrap iframe { border-radius: 4px; display: block; }
-        #taja-footer-wrap { padding: 15px; text-align: center; border-top: 1px solid var(--border); color: var(--muted); font-size: .75rem; line-height: 1.4; }
-        #taja-footer-wrap p { margin: 0; }
-        #taja-footer-wrap a { color: var(--accent); text-decoration: none; font-weight: 700; }
-        .countdown-winner { font-size: 14px; color: var(--accent); margin-bottom: 4px; font-weight: 600; }
-        .countdown-row { display: flex; align-items: center; gap: 15px; }
-        .countdown-label { text-align: left; }
-        #ws_status_dot.connected { animation: pulse-green 2s infinite; }
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #f7f8fa;
+            --surface: #ffffff;
+            --surface-soft: #fafafa;
+
+            --text: #111827;
+            --text-sub: #4b5563;
+            --muted: #9ca3af;
+
+            --border: #e5e7eb;
+            --border-dark: #d1d5db;
+
+            --primary: #2563eb;
+            --primary-soft: #eff6ff;
+
+            --green: #16a34a;
+            --green-soft: #f0fdf4;
+
+            --red: #dc2626;
+            --red-soft: #fef2f2;
+
+            --radius: 18px;
+            --radius-small: 12px;
+
+            --shadow:
+                    0 1px 2px rgba(0, 0, 0, 0.03),
+                    0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+
+            min-height: 100%;
+
+            background: var(--background);
+
+            color: var(--text);
+
+            font-family:
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Apple SD Gothic Neo",
+                    "Noto Sans KR",
+                    "Malgun Gothic",
+                    sans-serif;
+
+            letter-spacing: -0.03em;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        .app {
+            width: 100%;
+            min-height: 100vh;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================
+           Header
+        ========================= */
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+
+            width: 100%;
+
+            background: rgba(255, 255, 255, 0.96);
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            width: min(1500px, 100%);
+            min-height: 68px;
+
+            margin: 0 auto;
+            padding: 0 24px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 20px;
+        }
+
+        .logo {
+            flex-shrink: 0;
+
+            font-size: 19px;
+            font-weight: 800;
+
+            letter-spacing: -0.04em;
+
+            color: var(--text);
+        }
+
+        .logo strong {
+            color: var(--primary);
+        }
+
+        .connection {
+            display: flex;
+            align-items: center;
+
+            gap: 7px;
+
+            margin-left: auto;
+
+            color: var(--text-sub);
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: var(--muted);
+        }
+
+        .connection.online .connection-dot {
+            background: var(--green);
+        }
+
+        .room-badge {
+            padding: 7px 11px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 999px;
+
+            background: var(--surface-soft);
+
+            color: var(--text-sub);
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           Layout
+        ========================= */
+
+        .main {
+            width: min(1500px, 100%);
+
+            margin: 0 auto;
+            padding: 24px;
+
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1fr)
+                350px;
+
+            gap: 20px;
+
+            flex: 1;
+        }
+
+        .card {
+            background: var(--surface);
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius);
+
+            box-shadow: var(--shadow);
+        }
+
+        /* =========================
+           Game
+        ========================= */
+
+        .game {
+            min-width: 0;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            padding: 22px 24px;
+
+            border-bottom: 1px solid var(--border);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+        }
+
+        .game-title {
+            margin: 0;
+
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .game-description {
+            margin-top: 5px;
+
+            color: var(--text-sub);
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .round {
+            flex-shrink: 0;
+
+            color: var(--primary);
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           Players
+        ========================= */
+
+        .race-area {
+            min-height: 250px;
+
+            padding: 25px 24px;
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 20px;
+        }
+
+        .empty-player {
+            padding: 60px 20px;
+
+            text-align: center;
+
+            color: var(--muted);
+
+            font-size: 14px;
+        }
+
+        .race-player {
+            display: grid;
+            grid-template-columns:
+                140px
+                minmax(0, 1fr)
+                58px;
+
+            gap: 14px;
+
+            align-items: center;
+        }
+
+        .player-name {
+            min-width: 0;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            color: var(--text-sub);
+
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .race-player.me .player-name {
+            color: var(--primary);
+        }
+
+        .me-badge {
+            display: inline-flex;
+
+            margin-left: 5px;
+
+            padding: 2px 5px;
+
+            border-radius: 5px;
+
+            background: var(--primary-soft);
+
+            color: var(--primary);
+
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .race-track {
+            position: relative;
+
+            height: 13px;
+
+            overflow: visible;
+
+            border-radius: 999px;
+
+            background: #edf0f4;
+        }
+
+        .race-progress {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: 0;
+            height: 100%;
+
+            border-radius: inherit;
+
+            background: #aeb8c7;
+
+            transition: width 0.15s ease;
+        }
+
+        .race-player.me .race-progress {
+            background: var(--primary);
+        }
+
+        .race-icon {
+            position: absolute;
+
+            top: 50%;
+
+            transform: translate(-50%, -50%);
+
+            transition: left 0.15s ease;
+
+            font-size: 20px;
+
+            line-height: 1;
+        }
+
+        .player-progress {
+            text-align: right;
+
+            color: var(--text-sub);
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           Typing
+        ========================= */
+
+        .typing-area {
+            margin-top: auto;
+
+            padding: 24px;
+
+            border-top: 1px solid var(--border);
+
+            background: var(--surface-soft);
+
+            border-radius:
+                    0
+                    0
+                    var(--radius)
+                    var(--radius);
+        }
+
+        .sentence {
+            min-height: 80px;
+
+            padding: 22px;
+
+            display: flex;
+            align-items: center;
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            background: #fff;
+
+            color: var(--text);
+
+            font-size: clamp(17px, 2vw, 23px);
+            font-weight: 600;
+
+            line-height: 1.8;
+
+            word-break: keep-all;
+        }
+
+        .sentence-done {
+            color: var(--primary);
+        }
+
+        .sentence-current {
+            padding-bottom: 2px;
+
+            border-bottom: 3px solid var(--primary);
+
+            color: var(--text);
+
+            font-weight: 800;
+        }
+
+        .sentence-rest {
+            color: var(--text);
+        }
+
+        .typing-input {
+            width: 100%;
+            height: 58px;
+
+            margin-top: 14px;
+            padding: 0 18px;
+
+            border: 1px solid var(--border-dark);
+
+            border-radius: 13px;
+
+            outline: none;
+
+            background: #fff;
+
+            color: var(--text);
+
+            font-size: 17px;
+        }
+
+        .typing-input::placeholder {
+            color: var(--muted);
+        }
+
+        .typing-input:focus {
+            border-color: var(--primary);
+
+            box-shadow:
+                    0 0 0 3px rgba(37, 99, 235, 0.09);
+        }
+
+        .typing-input.error {
+            border-color: var(--red);
+
+            background: var(--red-soft);
+        }
+
+        .typing-input:disabled {
+            cursor: not-allowed;
+
+            background: #f3f4f6;
+
+            color: var(--muted);
+        }
+
+        /* =========================
+           Stats
+        ========================= */
+
+        .stats {
+            margin-top: 14px;
+
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+
+            gap: 10px;
+        }
+
+        .stat {
+            padding: 13px 15px;
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius-small);
+
+            background: #fff;
+        }
+
+        .stat-label {
+            color: var(--muted);
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            margin-top: 5px;
+
+            color: var(--text);
+
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .stat-value.primary {
+            color: var(--primary);
+        }
+
+        .stat-unit {
+            margin-left: 2px;
+
+            color: var(--text-sub);
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* =========================
+           Chat
+        ========================= */
+
+        .chat {
+            min-width: 0;
+
+            height: calc(100vh - 117px);
+
+            min-height: 580px;
+
+            position: sticky;
+            top: 92px;
+
+            display: flex;
+            flex-direction: column;
+
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 19px 20px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chat-title {
+            margin: 0;
+
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .chat-description {
+            margin-top: 4px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+        }
+
+        .chat-messages {
+            min-height: 0;
+
+            flex: 1;
+
+            padding: 18px;
+
+            overflow-y: auto;
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 15px;
+        }
+
+        .chat-message {
+            min-width: 0;
+        }
+
+        .chat-name {
+            margin-bottom: 4px;
+
+            color: var(--text-sub);
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .chat-message.me .chat-name {
+            color: var(--primary);
+        }
+
+        .chat-text {
+            display: inline-block;
+
+            max-width: 90%;
+
+            padding: 9px 11px;
+
+            border-radius: 10px;
+
+            background: #f3f4f6;
+
+            color: var(--text);
+
+            font-size: 13px;
+            line-height: 1.5;
+
+            word-break: break-word;
+        }
+
+        .chat-message.me .chat-text {
+            background: var(--primary-soft);
+
+            color: #1e40af;
+        }
+
+        .chat-time {
+            margin-top: 3px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+        }
+
+        .emoji-list {
+            padding: 10px 14px;
+
+            display: flex;
+            gap: 7px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .emoji-button {
+            width: 37px;
+            height: 37px;
+
+            padding: 0;
+
+            border: 1px solid var(--border);
+
+            border-radius: 9px;
+
+            background: #fff;
+
+            font-size: 17px;
+        }
+
+        .emoji-button:hover {
+            background: var(--surface-soft);
+        }
+
+        .chat-form {
+            padding: 12px;
+
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1fr)
+                auto;
+
+            gap: 8px;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-input {
+            min-width: 0;
+            height: 42px;
+
+            padding: 0 12px;
+
+            border: 1px solid var(--border-dark);
+
+            border-radius: 10px;
+
+            outline: none;
+
+            background: #fff;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-send {
+            height: 42px;
+
+            padding: 0 15px;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            background: var(--primary);
+
+            color: #fff;
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           Nickname
+        ========================= */
+
+        .nickname-area {
+            padding: 13px;
+
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1fr)
+                auto;
+
+            gap: 7px;
+
+            border-top: 1px solid var(--border);
+
+            background: var(--surface-soft);
+        }
+
+        .nickname-input {
+            min-width: 0;
+            height: 38px;
+
+            padding: 0 11px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 9px;
+
+            outline: none;
+
+            background: #fff;
+
+            font-size: 12px;
+        }
+
+        .nickname-save {
+            padding: 0 12px;
+
+            border: 1px solid var(--border-dark);
+
+            border-radius: 9px;
+
+            background: #fff;
+
+            color: var(--text-sub);
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           Completion
+        ========================= */
+
+        .complete-message {
+            display: none;
+
+            margin-top: 14px;
+            padding: 13px 15px;
+
+            border: 1px solid #bbf7d0;
+
+            border-radius: 12px;
+
+            background: var(--green-soft);
+
+            color: #166534;
+
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .complete-message.show {
+            display: block;
+        }
+
+        /* =========================
+           Footer
+        ========================= */
+
+        .footer {
+            padding: 22px;
+
+            text-align: center;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        /* =========================
+           Responsive
+        ========================= */
+
+        @media (max-width: 1000px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+
+            .chat {
+                position: static;
+
+                height: 520px;
+                min-height: 0;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header-inner {
+                min-height: 60px;
+
+                padding: 0 15px;
+
+                gap: 10px;
+            }
+
+            .logo {
+                font-size: 16px;
+            }
+
+            .connection-text {
+                display: none;
+            }
+
+            .main {
+                padding: 12px;
+
+                gap: 12px;
+            }
+
+            .game-header,
+            .race-area,
+            .typing-area {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .game-header {
+                padding-top: 17px;
+                padding-bottom: 17px;
+            }
+
+            .race-player {
+                grid-template-columns:
+                    90px
+                    minmax(0, 1fr)
+                    42px;
+
+                gap: 8px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .sentence {
+                min-height: 100px;
+
+                padding: 17px;
+
+                font-size: 17px;
+            }
+
+            .typing-input {
+                height: 54px;
+
+                font-size: 16px;
+            }
+        }
     </style>
-
-    <script src="https://unpkg.com/centrifuge@3.1.0/dist/centrifuge.js" defer></script>
 </head>
+
 <body>
-<div id="app">
-    <header id="topbar">
-        <div class="logo">OK<span>TAJA</span> RACING</div>
-        <div class="topbar-sep"></div>
-        <div class="live-dot" id="ws_status_dot" aria-label="서버 연결 상태"></div>
 
-        <div class="topbar-notice-wrap">
-            <marquee id="notice_text" scrollamount="5">
-                <span class="notice-message">🎵 [필독] 귀가 즐거운 타자 연습 안내 · 음악과 함께 즐겨보세요.</span>
-            </marquee>
+<div class="app">
+
+    <header class="header">
+        <div class="header-inner">
+
+            <div class="logo">
+                OK<strong>TAJA</strong> RACING
+            </div>
+
+            <div
+                    class="connection"
+                    id="connectionStatus"
+            >
+                <span class="connection-dot"></span>
+
+                <span class="connection-text">
+                    Firebase 연결 중
+                </span>
+            </div>
+
+            <div class="room-badge">
+                ROOM #1
+            </div>
+
         </div>
-
-        <div class="room-badge" id="room-label">ROOM #1</div>
     </header>
 
-    <section id="panel-rank">
-        <div class="panel-header">
-            <span class="icon">🏆</span>
-            <h2>실시간 순위</h2>
-        </div>
-        <div id="rank-list"></div>
-    </section>
 
-    <main id="panel-game">
-        <div id="countdown-overlay">
-            <div class="cd-num" id="cd-num">3</div>
-            <div class="cd-label">다음 라운드 시작</div>
-        </div>
+    <main class="main">
 
-        <div id="race-area"></div>
+        <!-- =========================
+             GAME
+        ========================== -->
 
-        <div id="typing-area">
-            <div id="target_word">문장을 불러오는 중...</div>
-            <input
-                type="text"
-                id="taja_input"
-                autocomplete="off"
-                autofocus
-                placeholder="위 문장을 그대로 따라 치세요!"
-                disabled>
+        <section class="game card">
 
-            <div class="stats-row">
-                <div class="stat-item">
-                    <div class="stat-label">타수</div>
-                    <div class="stat-value accent"><span id="current_wpm">0</span><span class="stat-unit"> 타</span></div>
+            <div class="game-header">
+
+                <div>
+                    <h1 class="game-title">
+                        🏁 실시간 타자 레이싱
+                    </h1>
+
+                    <div class="game-description">
+                        문장을 정확하게 입력해 결승선까지 달려보세요.
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-label">정확도</div>
-                    <div class="stat-value"><span id="current_acc">100</span><span class="stat-unit"> %</span></div>
+
+                <div class="round">
+                    ROUND
+                    <span id="roundNumber">1</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-label">진행</div>
-                    <div class="stat-value"><span id="current_progress">0</span><span class="stat-unit"> %</span></div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">라운드</div>
-                    <div class="stat-value"><span id="current_round">1</span><span class="stat-unit"> R</span></div>
+
+            </div>
+
+
+            <div
+                    class="race-area"
+                    id="raceArea"
+            >
+                <div class="empty-player">
+                    참가자를 불러오는 중입니다.
                 </div>
             </div>
-        </div>
+
+
+            <div class="typing-area">
+
+                <div
+                        class="sentence"
+                        id="targetSentence"
+                >
+                    게임을 준비하고 있습니다.
+                </div>
+
+                <input
+                        type="text"
+                        class="typing-input"
+                        id="typingInput"
+
+                        autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+
+                        placeholder="위 문장을 그대로 입력하세요."
+                        disabled
+                >
+
+                <div class="stats">
+
+                    <div class="stat">
+                        <div class="stat-label">
+                            타수
+                        </div>
+
+                        <div class="stat-value primary">
+                            <span id="cpm">0</span>
+                            <span class="stat-unit">타</span>
+                        </div>
+                    </div>
+
+
+                    <div class="stat">
+                        <div class="stat-label">
+                            정확도
+                        </div>
+
+                        <div class="stat-value">
+                            <span id="accuracy">100</span>
+                            <span class="stat-unit">%</span>
+                        </div>
+                    </div>
+
+
+                    <div class="stat">
+                        <div class="stat-label">
+                            진행
+                        </div>
+
+                        <div class="stat-value">
+                            <span id="progress">0</span>
+                            <span class="stat-unit">%</span>
+                        </div>
+                    </div>
+
+
+                    <div class="stat">
+                        <div class="stat-label">
+                            참가자
+                        </div>
+
+                        <div class="stat-value">
+                            <span id="playerCount">0</span>
+                            <span class="stat-unit">명</span>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div
+                        class="complete-message"
+                        id="completeMessage"
+                >
+                    🏁 문장을 완성했습니다. 다음 라운드를 준비합니다.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CHAT
+        ========================== -->
+
+        <aside class="chat card">
+
+            <div class="chat-header">
+
+                <h2 class="chat-title">
+                    💬 실시간 채팅
+                </h2>
+
+                <div class="chat-description">
+                    같은 방에 접속한 사용자와 대화할 수 있습니다.
+                </div>
+
+            </div>
+
+
+            <div
+                    class="chat-messages"
+                    id="chatMessages"
+            ></div>
+
+
+            <div class="emoji-list">
+
+                <button
+                        type="button"
+                        class="emoji-button"
+                        data-emoji="👏"
+                        aria-label="박수"
+                >
+                    👏
+                </button>
+
+                <button
+                        type="button"
+                        class="emoji-button"
+                        data-emoji="🔥"
+                        aria-label="불"
+                >
+                    🔥
+                </button>
+
+                <button
+                        type="button"
+                        class="emoji-button"
+                        data-emoji="😱"
+                        aria-label="놀람"
+                >
+                    😱
+                </button>
+
+                <button
+                        type="button"
+                        class="emoji-button"
+                        data-emoji="💨"
+                        aria-label="질주"
+                >
+                    💨
+                </button>
+
+                <button
+                        type="button"
+                        class="emoji-button"
+                        data-emoji="🏁"
+                        aria-label="결승선"
+                >
+                    🏁
+                </button>
+
+            </div>
+
+
+            <form
+                    class="chat-form"
+                    id="chatForm"
+            >
+
+                <input
+                        type="text"
+                        class="chat-input"
+                        id="chatInput"
+
+                        maxlength="80"
+                        autocomplete="off"
+
+                        placeholder="메시지 입력..."
+                >
+
+                <button
+                        type="submit"
+                        class="chat-send"
+                >
+                    전송
+                </button>
+
+            </form>
+
+
+            <div class="nickname-area">
+
+                <input
+                        type="text"
+                        class="nickname-input"
+                        id="nicknameInput"
+
+                        maxlength="16"
+                        autocomplete="off"
+
+                        placeholder="닉네임"
+                >
+
+                <button
+                        type="button"
+                        class="nickname-save"
+                        id="nicknameSave"
+                >
+                    변경
+                </button>
+
+            </div>
+
+        </aside>
+
     </main>
 
-    <aside id="panel-chat">
-        <div class="panel-header">
-            <span class="icon">💬</span>
-            <h2>채팅</h2>
-        </div>
 
-        <div id="chat-messages"></div>
-        <div id="youtube-video-wrap"></div>
+    <footer class="footer">
+        OKTAJA RACING
+    </footer>
 
-        <div class="emoji-row">
-            <button type="button" class="emoji-btn" data-emoji="👏">👏</button>
-            <button type="button" class="emoji-btn" data-emoji="🔥">🔥</button>
-            <button type="button" class="emoji-btn" data-emoji="😱">😱</button>
-            <button type="button" class="emoji-btn" data-emoji="💨">💨</button>
-            <button type="button" class="emoji-btn" data-emoji="🏁">🏁</button>
-        </div>
-
-        <div class="chat-input-wrap">
-            <input type="text" id="chat_input" placeholder="메시지 입력..." maxlength="80">
-            <button type="button" id="chat_send">전송</button>
-        </div>
-
-        <footer id="taja-footer-wrap"></footer>
-    </aside>
 </div>
 
-<script>
-    const USER_INFO = {
-        id: 'qqq@ai.okko.kr',
-        nick: 'qqq@ai.okko.kr'
+
+<!--
+=========================================================
+Firebase 12
+=========================================================
+현재 Firebase JavaScript SDK 12.x 모듈 방식입니다.
+
+firebaseConfig는 Firebase Console
+프로젝트 설정 → 내 앱 → SDK 설정 및 구성
+내용으로 교체하세요.
+=========================================================
+-->
+
+<script type="module">
+
+    import {
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
+
+    import {
+        getDatabase,
+        ref,
+        set,
+        update,
+        push,
+        remove,
+        onValue,
+        onChildAdded,
+        onDisconnect,
+        serverTimestamp,
+        query,
+        limitToLast,
+        runTransaction
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+
+    /* =====================================================
+       Firebase 설정
+    ===================================================== */
+
+    const firebaseConfig = {
+
+        apiKey: "AIzaSyBCN-yOjN0CYjdskON8kOzELYELQ8zRMm8",
+        authDomain: "temp-crud-85ba9.firebaseapp.com",
+        databaseURL: "https://temp-crud-85ba9-default-rtdb.firebaseio.com",
+        projectId: "temp-crud-85ba9",
+        storageBucket: "temp-crud-85ba9.firebasestorage.app",
+        messagingSenderId: "990504243112",
+        appId: "1:990504243112:web:69f2117ad0ffc9ca1f579d"
+
     };
 
-    const ROOM_ID = '1';
-    const RANK_SAVE_URL = './rank_save.php';
-    const RANK_START_URL = './rank_start.php';
-    const OKTAJA_SERVER_URL = 'https://ai.okko.kr/taja_admin';
-    const NOTICE_CHANNEL = 'typing:notice';
-    const CHANNEL_PREFIX = '';
+
+    const firebaseApp = initializeApp(firebaseConfig);
+
+    const database = getDatabase(firebaseApp);
+
+
+    /* =====================================================
+       기본 설정
+    ===================================================== */
+
+    const ROOM_ID = "1";
+
+    const ROOM_PATH =
+              "oktajaRacing/rooms/" + ROOM_ID;
+
+
+    /*
+    랭킹 기능은 사용하지 않습니다.
+
+    Firebase 데이터 구조:
+
+    oktajaRacing
+    └─ rooms
+       └─ 1
+          ├─ state
+          │  └─ round
+          │
+          ├─ players
+          │  └─ clientId
+          │
+          └─ messages
+    */
+
+
+    /* =====================================================
+       문장
+    ===================================================== */
+
+    const sentences = [
+
+        "오늘도 즐겁게 타자 연습을 시작합니다.",
+
+        "빠른 타자보다 정확한 타자가 더 중요합니다.",
+
+        "꾸준히 연습하면 타자 속도는 자연스럽게 빨라집니다.",
+
+        "작은 연습이 모여 큰 실력을 만들어 냅니다.",
+
+        "천천히 정확하게 입력하는 습관을 만들어 보세요.",
+
+        "컴퓨터와 친해지는 가장 좋은 방법은 직접 사용해 보는 것입니다.",
+
+        "한 글자씩 정확하게 입력하며 결승선을 향해 달려갑니다.",
+
+        "오늘의 연습이 내일의 더 빠른 타자를 만들어 줍니다.",
+
+        "실수해도 괜찮습니다 다시 정확하게 입력하면 됩니다.",
+
+        "키보드를 보지 않고 입력하는 연습을 꾸준히 해 보세요.",
+
+        "즐겁게 연습하면 타자 실력도 자연스럽게 향상됩니다.",
+
+        "포기하지 않고 끝까지 입력하면 어느새 실력이 늘어 있습니다."
+
+    ];
+
+
+    /* =====================================================
+       Element
+    ===================================================== */
+
+    const raceArea =
+              document.getElementById("raceArea");
+
+    const targetSentence =
+              document.getElementById("targetSentence");
+
+    const typingInput =
+              document.getElementById("typingInput");
+
+    const roundNumber =
+              document.getElementById("roundNumber");
+
+    const cpmElement =
+              document.getElementById("cpm");
+
+    const accuracyElement =
+              document.getElementById("accuracy");
+
+    const progressElement =
+              document.getElementById("progress");
+
+    const playerCountElement =
+              document.getElementById("playerCount");
+
+    const completeMessage =
+              document.getElementById("completeMessage");
+
+    const chatMessages =
+              document.getElementById("chatMessages");
+
+    const chatForm =
+              document.getElementById("chatForm");
+
+    const chatInput =
+              document.getElementById("chatInput");
+
+    const nicknameInput =
+              document.getElementById("nicknameInput");
+
+    const nicknameSave =
+              document.getElementById("nicknameSave");
+
+    const connectionStatus =
+              document.getElementById("connectionStatus");
+
+
+    /* =====================================================
+       사용자
+    ===================================================== */
+
+    function createClientId() {
+
+        if (
+            window.crypto &&
+            typeof window.crypto.randomUUID === "function"
+        ) {
+            return window.crypto.randomUUID();
+        }
+
+        return (
+            Date.now().toString(36) +
+            Math.random().toString(36).substring(2)
+        );
+
+    }
+
+
+    let clientId =
+            sessionStorage.getItem(
+                "oktaja_racing_client_id"
+            );
+
+
+    if (!clientId) {
+
+        clientId = createClientId();
+
+        sessionStorage.setItem(
+            "oktaja_racing_client_id",
+            clientId
+        );
+
+    }
+
+
+    let nickname =
+            localStorage.getItem(
+                "oktaja_racing_nickname"
+            );
+
+
+    if (!nickname) {
+
+        nickname =
+            "레이서" +
+            Math.floor(
+                1000 + Math.random() * 9000
+            );
+
+    }
+
+
+    nicknameInput.value = nickname;
+
+
+    /* =====================================================
+       Game State
+    ===================================================== */
+
+    let currentRound = 1;
+
+    let currentSentence = "";
+
+    let startTime = 0;
+
+    let isComposing = false;
+
+    let isCompleted = false;
+
+    let lastProgress = -1;
+
+    let roundChangeTimer = null;
+
+
+    /* =====================================================
+       Firebase Reference
+    ===================================================== */
+
+    const connectedRef =
+              ref(database, ".info/connected");
+
+    const roomStateRef =
+              ref(
+                  database,
+                  ROOM_PATH + "/state"
+              );
+
+    const roundRef =
+              ref(
+                  database,
+                  ROOM_PATH + "/state/round"
+              );
+
+    const playersRef =
+              ref(
+                  database,
+                  ROOM_PATH + "/players"
+              );
+
+    const myPlayerRef =
+              ref(
+                  database,
+                  ROOM_PATH +
+                  "/players/" +
+                  clientId
+              );
+
+    const messagesRef =
+              ref(
+                  database,
+                  ROOM_PATH + "/messages"
+              );
+
+
+    /* =====================================================
+       HTML Escape
+    ===================================================== */
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* =====================================================
+       Connection
+    ===================================================== */
+
+    onValue(
+        connectedRef,
+        async snapshot => {
+
+            const connected =
+                      snapshot.val() === true;
+
+
+            connectionStatus.classList.toggle(
+                "online",
+                connected
+            );
+
+
+            const text =
+                      connectionStatus.querySelector(
+                          ".connection-text"
+                      );
+
+
+            if (text) {
+
+                text.textContent =
+                    connected
+                        ? "Firebase 연결됨"
+                        : "Firebase 연결 중";
+
+            }
+
+
+            if (!connected) {
+                return;
+            }
+
+
+            try {
+
+                await onDisconnect(
+                    myPlayerRef
+                ).remove();
+
+
+                await set(
+                    myPlayerRef,
+                    {
+
+                        id: clientId,
+
+                        nickname: nickname,
+
+                        progress: 0,
+
+                        cpm: 0,
+
+                        accuracy: 100,
+
+                        round: currentRound,
+
+                        updatedAt:
+                            serverTimestamp()
+
+                    }
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "접속 처리 실패:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       초기 Round 생성
+    ===================================================== */
+
+    runTransaction(
+        roundRef,
+        value => {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return 1;
+            }
+
+            return value;
+
+        }
+    );
+
+
+    /* =====================================================
+       Round
+    ===================================================== */
+
+    onValue(
+        roomStateRef,
+        snapshot => {
+
+            const data =
+                      snapshot.val() || {};
+
+
+            const nextRound =
+                      Math.max(
+                          1,
+                          Number(data.round) || 1
+                      );
+
+
+            if (
+                nextRound !== currentRound ||
+                !currentSentence
+            ) {
+
+                startRound(nextRound);
+
+            }
+
+        }
+    );
+
+
+    function startRound(round) {
+
+        currentRound = round;
+
+        currentSentence =
+            sentences[
+            (currentRound - 1) %
+            sentences.length
+                ];
+
+
+        roundNumber.textContent =
+            currentRound;
+
+
+        typingInput.value = "";
+
+        typingInput.disabled = false;
+
+        typingInput.classList.remove(
+            "error"
+        );
+
+
+        completeMessage.classList.remove(
+            "show"
+        );
+
+
+        startTime = 0;
+
+        isCompleted = false;
+
+        lastProgress = -1;
+
+
+        cpmElement.textContent = "0";
+
+        accuracyElement.textContent = "100";
+
+        progressElement.textContent = "0";
+
+
+        renderSentence(
+            currentSentence,
+            0
+        );
+
+
+        updateMyPlayer({
+            progress: 0,
+            cpm: 0,
+            accuracy: 100,
+            round: currentRound
+        });
+
+
+        setTimeout(
+            () => typingInput.focus(),
+            100
+        );
+
+    }
+
+
+    /* =====================================================
+       Sentence Rendering
+    ===================================================== */
+
+    function renderSentence(
+        sentence,
+        correctLength
+    ) {
+
+        targetSentence.replaceChildren();
+
+
+        const done =
+                  sentence.substring(
+                      0,
+                      correctLength
+                  );
+
+
+        const current =
+                  sentence.charAt(
+                      correctLength
+                  );
+
+
+        const rest =
+                  sentence.substring(
+                      correctLength + 1
+                  );
+
+
+        const doneSpan =
+                  document.createElement("span");
+
+        doneSpan.className =
+            "sentence-done";
+
+        doneSpan.textContent =
+            done;
+
+
+        targetSentence.appendChild(
+            doneSpan
+        );
+
+
+        if (current) {
+
+            const currentSpan =
+                      document.createElement("span");
+
+            currentSpan.className =
+                "sentence-current";
+
+            currentSpan.textContent =
+                current;
+
+            targetSentence.appendChild(
+                currentSpan
+            );
+
+        }
+
+
+        if (rest) {
+
+            const restSpan =
+                      document.createElement("span");
+
+            restSpan.className =
+                "sentence-rest";
+
+            restSpan.textContent =
+                rest;
+
+            targetSentence.appendChild(
+                restSpan
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       Typing
+    ===================================================== */
+
+    typingInput.addEventListener(
+        "compositionstart",
+        () => {
+
+            isComposing = true;
+
+        }
+    );
+
+
+    typingInput.addEventListener(
+        "compositionend",
+        () => {
+
+            isComposing = false;
+
+            checkTyping();
+
+        }
+    );
+
+
+    typingInput.addEventListener(
+        "input",
+        () => {
+
+            if (!isComposing) {
+                checkTyping();
+            }
+
+        }
+    );
+
+
+    function getCorrectLength(
+        typed,
+        target
+    ) {
+
+        const max =
+                  Math.min(
+                      typed.length,
+                      target.length
+                  );
+
+
+        let correct = 0;
+
+
+        while (
+            correct < max &&
+            typed.charAt(correct) ===
+            target.charAt(correct)
+            ) {
+
+            correct++;
+
+        }
+
+
+        return correct;
+
+    }
+
+
+    function calculateAccuracy(
+        typed,
+        target
+    ) {
+
+        if (!typed.length) {
+            return 100;
+        }
+
+
+        let correct = 0;
+
+
+        for (
+            let i = 0;
+            i < typed.length;
+            i++
+        ) {
+
+            if (
+                typed.charAt(i) ===
+                target.charAt(i)
+            ) {
+
+                correct++;
+
+            }
+
+        }
+
+
+        return Math.max(
+            0,
+            Math.round(
+                (correct / typed.length) *
+                100
+            )
+        );
+
+    }
+
+
+    function calculateCPM(
+        correctLength
+    ) {
+
+        if (!startTime) {
+            return 0;
+        }
+
+
+        const elapsedMinutes =
+                  (Date.now() - startTime) /
+                  60000;
+
+
+        if (elapsedMinutes <= 0) {
+            return 0;
+        }
+
+
+        return Math.round(
+            correctLength /
+            elapsedMinutes
+        );
+
+    }
+
+
+    function checkTyping() {
+
+        if (
+            !currentSentence ||
+            isCompleted
+        ) {
+            return;
+        }
+
+
+        const typed =
+                  typingInput.value;
+
+
+        if (
+            !startTime &&
+            typed.length > 0
+        ) {
+
+            startTime =
+                Date.now();
+
+        }
+
+
+        const correctLength =
+                  getCorrectLength(
+                      typed,
+                      currentSentence
+                  );
+
+
+        const progress =
+                  Math.min(
+                      100,
+                      Math.round(
+                          (
+                              correctLength /
+                              currentSentence.length
+                          ) *
+                          100
+                      )
+                  );
+
+
+        const accuracy =
+                  calculateAccuracy(
+                      typed,
+                      currentSentence
+                  );
+
+
+        const cpm =
+                  calculateCPM(
+                      correctLength
+                  );
+
+
+        const hasError =
+                  typed.length >
+                  correctLength;
+
+
+        typingInput.classList.toggle(
+            "error",
+            hasError
+        );
+
+
+        renderSentence(
+            currentSentence,
+            correctLength
+        );
+
+
+        cpmElement.textContent =
+            cpm;
+
+        accuracyElement.textContent =
+            accuracy;
+
+        progressElement.textContent =
+            progress;
+
+
+        /*
+         Firebase 쓰기 횟수를 줄이기 위해
+         진행률이 바뀐 경우에만 전송합니다.
+        */
+
+        if (
+            progress !== lastProgress
+        ) {
+
+            lastProgress =
+                progress;
+
+
+            updateMyPlayer({
+
+                progress: progress,
+
+                cpm: cpm,
+
+                accuracy: accuracy,
+
+                round: currentRound
+
+            });
+
+        }
+
+
+        if (
+            typed === currentSentence
+        ) {
+
+            completeRound(
+                cpm,
+                accuracy
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       Round Complete
+    ===================================================== */
+
+    async function completeRound(
+        cpm,
+        accuracy
+    ) {
+
+        if (isCompleted) {
+            return;
+        }
+
+
+        isCompleted = true;
+
+        typingInput.disabled = true;
+
+
+        cpmElement.textContent =
+            cpm;
+
+        accuracyElement.textContent =
+            accuracy;
+
+        progressElement.textContent =
+            "100";
+
+
+        completeMessage.classList.add(
+            "show"
+        );
+
+
+        await updateMyPlayer({
+
+            progress: 100,
+
+            cpm: cpm,
+
+            accuracy: accuracy,
+
+            round: currentRound,
+
+            completed: true
+
+        });
+
+
+        /*
+         랭킹 저장 없음.
+         최초 완성자가 다음 라운드로 넘깁니다.
+
+         다른 사용자가 이미 라운드를 변경했다면
+         transaction에서 중복 증가시키지 않습니다.
+        */
+
+        const completedRound =
+                  currentRound;
+
+
+        clearTimeout(
+            roundChangeTimer
+        );
+
+
+        roundChangeTimer =
+            setTimeout(
+                async () => {
+
+                    try {
+
+                        await runTransaction(
+                            roundRef,
+                            value => {
+
+                                const firebaseRound =
+                                          Number(value) || 1;
+
+
+                                if (
+                                    firebaseRound !==
+                                    completedRound
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                return (
+                                    firebaseRound + 1
+                                );
+
+                            }
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "다음 라운드 처리 실패:",
+                            error
+                        );
+
+                    }
+
+                },
+                2500
+            );
+
+    }
+
+
+    /* =====================================================
+       Player Update
+    ===================================================== */
+
+    function updateMyPlayer(
+        data
+    ) {
+
+        return update(
+            myPlayerRef,
+            {
+
+                id: clientId,
+
+                nickname: nickname,
+
+                ...data,
+
+                updatedAt:
+                    serverTimestamp()
+
+            }
+        ).catch(
+            error => {
+
+                console.error(
+                    "플레이어 정보 저장 실패:",
+                    error
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       Players Rendering
+    ===================================================== */
+
+    onValue(
+        playersRef,
+        snapshot => {
+
+            const players =
+                      snapshot.val() || {};
+
+
+            const playerList =
+                      Object.values(players)
+                      .filter(
+                          player =>
+                              Number(
+                                  player.round
+                              ) ===
+                              currentRound
+                      );
+
+
+            playerCountElement.textContent =
+                playerList.length;
+
+
+            renderPlayers(
+                playerList
+            );
+
+        }
+    );
+
+
+    function renderPlayers(
+        players
+    ) {
+
+        raceArea.replaceChildren();
+
+
+        if (!players.length) {
+
+            const empty =
+                      document.createElement(
+                          "div"
+                      );
+
+            empty.className =
+                "empty-player";
+
+            empty.textContent =
+                "현재 참가자가 없습니다.";
+
+
+            raceArea.appendChild(
+                empty
+            );
+
+            return;
+
+        }
+
+
+        /*
+         랭킹 기능 제거:
+         progress 기준으로 정렬하지 않습니다.
+
+         나를 먼저 보여주고,
+         나머지는 닉네임순으로만 표시합니다.
+        */
+
+        players.sort(
+            (a, b) => {
+
+                if (
+                    a.id === clientId
+                ) {
+                    return -1;
+                }
+
+
+                if (
+                    b.id === clientId
+                ) {
+                    return 1;
+                }
+
+
+                return String(
+                    a.nickname || ""
+                ).localeCompare(
+                    String(
+                        b.nickname || ""
+                    ),
+                    "ko"
+                );
+
+            }
+        );
+
+
+        players.forEach(
+            (player, index) => {
+
+                const isMe =
+                          player.id === clientId;
+
+
+                const progress =
+                          Math.max(
+                              0,
+                              Math.min(
+                                  100,
+                                  Number(
+                                      player.progress
+                                  ) || 0
+                              )
+                          );
+
+
+                const item =
+                          document.createElement(
+                              "div"
+                          );
+
+
+                item.className =
+                    "race-player" +
+                    (
+                        isMe
+                            ? " me"
+                            : ""
+                    );
+
+
+                const icon =
+                          isMe
+                              ? "🚗"
+                              : [
+                                  "🚙",
+                                  "🚕",
+                                  "🚓",
+                                  "🏎️",
+                                  "🚐",
+                                  "🛻"
+                              ][
+                              index % 6
+                                  ];
+
+
+                item.innerHTML = `
+                <div class="player-name">
+                    ${escapeHtml(
+                    player.nickname ||
+                    "레이서"
+                )}
+
+                    ${
+                    isMe
+                        ? '<span class="me-badge">나</span>'
+                        : ""
+                }
+                </div>
+
+                <div class="race-track">
+
+                    <div
+                        class="race-progress"
+                        style="width:${progress}%"
+                    ></div>
+
+                    <div
+                        class="race-icon"
+                        style="left:${progress}%"
+                    >
+                        ${icon}
+                    </div>
+
+                </div>
+
+                <div class="player-progress">
+                    ${Math.round(progress)}%
+                </div>
+            `;
+
+
+                raceArea.appendChild(
+                    item
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       Nickname
+    ===================================================== */
+
+    nicknameSave.addEventListener(
+        "click",
+        saveNickname
+    );
+
+
+    nicknameInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+                saveNickname();
+
+            }
+
+        }
+    );
+
+
+    function saveNickname() {
+
+        let value =
+                nicknameInput.value.trim();
+
+
+        value =
+            value.replace(
+                /[<>]/g,
+                ""
+            );
+
+
+        if (!value) {
+
+            alert(
+                "닉네임을 입력해 주세요."
+            );
+
+            return;
+
+        }
+
+
+        if (value.length > 16) {
+
+            alert(
+                "닉네임은 16자 이하로 입력해 주세요."
+            );
+
+            return;
+
+        }
+
+
+        nickname = value;
+
+
+        localStorage.setItem(
+            "oktaja_racing_nickname",
+            nickname
+        );
+
+
+        nicknameInput.value =
+            nickname;
+
+
+        updateMyPlayer({
+            nickname: nickname
+        });
+
+
+        typingInput.focus();
+
+    }
+
+
+    /* =====================================================
+       Chat
+    ===================================================== */
+
+    let lastChatTime = 0;
+
+
+    const chatQuery =
+              query(
+                  messagesRef,
+                  limitToLast(100)
+              );
+
+
+    onChildAdded(
+        chatQuery,
+        snapshot => {
+
+            const message =
+                      snapshot.val();
+
+
+            if (!message) {
+                return;
+            }
+
+
+            renderChatMessage(
+                message
+            );
+
+        }
+    );
+
+
+    chatForm.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            sendChat(
+                chatInput.value
+            );
+
+        }
+    );
+
+
+    document
+    .querySelectorAll(
+        ".emoji-button"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    sendChat(
+                        button.dataset.emoji
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    async function sendChat(
+        rawMessage
+    ) {
+
+        const message =
+                  String(
+                      rawMessage || ""
+                  ).trim();
+
+
+        if (!message) {
+            return;
+        }
+
+
+        if (message.length > 80) {
+
+            alert(
+                "메시지는 80자 이하로 입력해 주세요."
+            );
+
+            return;
+
+        }
+
+
+        const now =
+                  Date.now();
+
+
+        if (
+            now - lastChatTime <
+            1000
+        ) {
+
+            return;
+
+        }
+
+
+        lastChatTime =
+            now;
+
+
+        try {
+
+            await push(
+                messagesRef,
+                {
+
+                    userId:
+                    clientId,
+
+                    nickname:
+                    nickname,
+
+                    message:
+                    message,
+
+                    timestamp:
+                        serverTimestamp()
+
+                }
+            );
+
+
+            chatInput.value =
+                "";
+
+            chatInput.focus();
+
+
+        } catch (error) {
+
+            console.error(
+                "채팅 전송 실패:",
+                error
+            );
+
+        }
+
+    }
+
+
+    function renderChatMessage(
+        data
+    ) {
+
+        const item =
+                  document.createElement(
+                      "div"
+                  );
+
+
+        const isMe =
+                  data.userId === clientId;
+
+
+        item.className =
+            "chat-message" +
+            (
+                isMe
+                    ? " me"
+                    : ""
+            );
+
+
+        let timeText = "";
+
+
+        if (
+            typeof data.timestamp ===
+            "number"
+        ) {
+
+            const date =
+                      new Date(
+                          data.timestamp
+                      );
+
+
+            timeText =
+                String(
+                    date.getHours()
+                ).padStart(
+                    2,
+                    "0"
+                ) +
+                ":" +
+                String(
+                    date.getMinutes()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+        }
+
+
+        item.innerHTML = `
+        <div class="chat-name">
+            ${escapeHtml(
+            data.nickname ||
+            "레이서"
+        )}
+        </div>
+
+        <div class="chat-text">
+            ${escapeHtml(
+            data.message || ""
+        )}
+        </div>
+
+        ${
+            timeText
+                ? `
+                    <div class="chat-time">
+                        ${timeText}
+                    </div>
+                `
+                : ""
+        }
+    `;
+
+
+        chatMessages.appendChild(
+            item
+        );
+
+
+        /*
+         DOM에도 최대 100개만 유지
+        */
+
+        while (
+            chatMessages.children.length >
+            100
+            ) {
+
+            chatMessages.removeChild(
+                chatMessages.firstChild
+            );
+
+        }
+
+
+        chatMessages.scrollTop =
+            chatMessages.scrollHeight;
+
+    }
+
+
+    /* =====================================================
+       Focus
+    ===================================================== */
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            setTimeout(
+                () => {
+
+                    if (
+                        !typingInput.disabled
+                    ) {
+
+                        typingInput.focus();
+
+                    }
+
+                },
+                500
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                typingInput.focus();
+
+            }
+
+        }
+    );
+
 </script>
 
-<script src="js/race_render.js"></script>
-<script src="js/taja_core.js"></script>
-<script src="js/taja_game.js"></script>
-
-<script>
-    window.addEventListener('load', () => {
-        TajaRender.init();
-        TajaCore.init();
-        TajaGame.init();
-    });
-</script>
 </body>
 </html>
